@@ -94,6 +94,16 @@ export async function GET(
 
     return NextResponse.json({ events });
   } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    const isMailboxUnavailable =
+      message.includes("inactive") ||
+      message.includes("soft-deleted") ||
+      message.includes("on-premise") ||
+      message.includes("MailboxNotEnabledForRESTAPI");
+    if (isMailboxUnavailable) {
+      console.warn(`Skipping unavailable mailbox: ${message}`);
+      return NextResponse.json({ events: [] });
+    }
     console.error("Failed to fetch room calendar:", error);
     return NextResponse.json(
       { error: "Failed to fetch room calendar" },
