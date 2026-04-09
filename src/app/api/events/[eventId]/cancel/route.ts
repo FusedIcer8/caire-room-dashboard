@@ -10,15 +10,15 @@ export async function DELETE(
   try {
     const { eventId } = await params;
     const body: unknown = await request.json();
-    const { organizerEmail, actor, target } = body as {
-      organizerEmail: string;
+    const { roomEmail, actor, target } = body as {
+      roomEmail: string;
       actor: AuditActor;
       target: AuditTarget;
     };
 
-    if (!organizerEmail || !eventId) {
+    if (!roomEmail || !eventId) {
       return NextResponse.json(
-        { error: "organizerEmail and eventId are required" },
+        { error: "roomEmail and eventId are required" },
         { status: 400 },
       );
     }
@@ -27,8 +27,8 @@ export async function DELETE(
     auditLogger.log("cancel_meeting", actor, target, "success", null);
 
     await client
-      .api(`/users/${organizerEmail}/events/${eventId}`)
-      .delete();
+      .api(`/users/${roomEmail}/events/${eventId}/cancel`)
+      .post({ comment: `Meeting cancelled by ${actor.name} via Room Dashboard` });
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {

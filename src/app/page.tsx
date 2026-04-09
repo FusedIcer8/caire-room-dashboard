@@ -108,7 +108,7 @@ export default function DashboardPage() {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            organizerEmail: event.organizer.email,
+            roomEmail: event.roomEmail,
             actor: actorInfo,
             target: {
               eventId: event.id,
