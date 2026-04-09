@@ -29,7 +29,7 @@ export default function DashboardPage() {
   const { account, userName, userEmail } = useAuth();
   const { showToast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
-  const [minCapacity, setMinCapacity] = useState(1);
+  const [minCapacity, setMinCapacity] = useState(0);
   const [panel, setPanel] = useState<PanelState>({ type: "none" });
   const [selectedSite, setSelectedSite] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<DateRange>(() =>

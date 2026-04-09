@@ -83,14 +83,14 @@ export function RoomSidebar({
             </div>
             <input
               type="range"
-              min={1}
+              min={0}
               max={30}
               value={minCapacity}
               onChange={(e) => onMinCapacityChange(Number(e.target.value))}
               className="w-full accent-indigo-500"
             />
             <div className="flex justify-between text-[10px] text-gray-600">
-              <span>1</span>
+              <span>0</span>
               <span>30+</span>
             </div>
           </div>

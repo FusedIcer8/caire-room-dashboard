@@ -23,11 +23,18 @@ async function fetchRooms(): Promise<Room[]> {
     return cachedRooms;
   }
   const client = await getGraphClient();
-  const response = await client
+  const all: Record<string, unknown>[] = [];
+  let response = await client
     .api("/places/microsoft.graph.room")
     .select(["id", "displayName", "emailAddress", "capacity", "building", "floorNumber"])
+    .top(100)
     .get();
-  cachedRooms = ((response.value ?? []) as Record<string, unknown>[]).map(mapGraphRoomToRoom);
+  all.push(...((response.value ?? []) as Record<string, unknown>[]));
+  while (response["@odata.nextLink"]) {
+    response = await client.api(response["@odata.nextLink"] as string).get();
+    all.push(...((response.value ?? []) as Record<string, unknown>[]));
+  }
+  cachedRooms = all.map(mapGraphRoomToRoom);
   cachedAt = now;
   return cachedRooms;
 }
