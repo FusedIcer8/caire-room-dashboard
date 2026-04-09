@@ -31,6 +31,7 @@ export default function DashboardPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [minCapacity, setMinCapacity] = useState(1);
   const [panel, setPanel] = useState<PanelState>({ type: "none" });
+  const [selectedSite, setSelectedSite] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<DateRange>(() =>
     getPresetRanges()["Today"](),
   );
@@ -43,14 +44,32 @@ export default function DashboardPage() {
 
   const { data: roomData } = useRooms();
 
+  // Auto-select first site once room data loads
+  useEffect(() => {
+    if (roomData && roomData.groups.length > 0 && selectedSite === null) {
+      setSelectedSite(roomData.groups[0].label);
+    }
+  }, [roomData, selectedSite]);
+
   const allRooms = useMemo(
     () => roomData?.groups.flatMap((g) => g.rooms) ?? [],
     [roomData],
   );
 
+  // Only fetch calendars and show rooms for the selected site
+  const visibleRooms = useMemo(() => {
+    if (!selectedSite) return allRooms;
+    const group = roomData?.groups.find((g) => g.label === selectedSite);
+    return (group?.rooms ?? []).filter(
+      (r) =>
+        r.displayName.toLowerCase().includes(searchQuery.toLowerCase()) &&
+        r.capacity >= minCapacity,
+    );
+  }, [selectedSite, roomData, allRooms, searchQuery, minCapacity]);
+
   const roomEmails = useMemo(
-    () => allRooms.map((r) => r.emailAddress),
-    [allRooms],
+    () => visibleRooms.map((r) => r.emailAddress),
+    [visibleRooms],
   );
 
   const { events, refresh } = useRoomCalendar({
@@ -73,12 +92,12 @@ export default function DashboardPage() {
 
   const handleEmptySlotClick = useCallback(
     (roomEmail: string, time: Date) => {
-      const room = allRooms.find((r) => r.emailAddress === roomEmail);
+      const room = visibleRooms.find((r) => r.emailAddress === roomEmail);
       if (room) {
         setPanel({ type: "quick-book", room, startTime: time });
       }
     },
-    [allRooms],
+    [visibleRooms],
   );
 
   const handleCancelMeeting = useCallback(
@@ -208,6 +227,8 @@ export default function DashboardPage() {
       sidebar={
         <RoomSidebar
           data={roomData}
+          selectedSite={selectedSite}
+          onSiteSelect={setSelectedSite}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           minCapacity={minCapacity}
@@ -222,7 +243,7 @@ export default function DashboardPage() {
         if (viewMode === "timeline") {
           return (
             <TimelineView
-              rooms={allRooms}
+              rooms={visibleRooms}
               events={events}
               onEventClick={handleEventClick}
               onEmptySlotClick={handleEmptySlotClick}
@@ -232,7 +253,7 @@ export default function DashboardPage() {
         if (viewMode === "daily") {
           return (
             <DailyView
-              rooms={allRooms}
+              rooms={visibleRooms}
               events={events}
               onEventClick={handleEventClick}
               onEmptySlotClick={handleEmptySlotClick}
@@ -242,7 +263,7 @@ export default function DashboardPage() {
         if (viewMode === "weekly") {
           return (
             <WeeklyView
-              rooms={allRooms}
+              rooms={visibleRooms}
               events={events}
               onEventClick={handleEventClick}
               onEmptySlotClick={handleEmptySlotClick}
