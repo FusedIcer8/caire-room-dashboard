@@ -32,23 +32,31 @@ async function fetchRooms(): Promise<Room[]> {
   return cachedRooms;
 }
 
-function groupByBuilding(rooms: Room[]): GroupedRooms {
-  const byBuilding = new Map<string, Room[]>();
+function getSiteLabel(emailAddress: string): string {
+  const local = emailAddress.split("@")[0].toLowerCase();
+  if (local.startsWith("can2200")) return "BG2200";
+  if (local.startsWith("can2205")) return "BG2205";
+  return "Other";
+}
+
+function groupBySite(rooms: Room[]): GroupedRooms {
+  const siteOrder = ["BG2200", "BG2205", "Other"];
+  const bySite = new Map<string, Room[]>();
+  for (const site of siteOrder) bySite.set(site, []);
   for (const room of rooms) {
-    const key = room.building;
-    const existing = byBuilding.get(key) ?? [];
-    byBuilding.set(key, [...existing, room]);
+    const key = getSiteLabel(room.emailAddress);
+    bySite.get(key)!.push(room);
   }
-  const groups: RoomGroup[] = Array.from(byBuilding.entries())
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([label, roomList]) => ({ label, rooms: roomList }));
+  const groups: RoomGroup[] = siteOrder
+    .filter((site) => (bySite.get(site)?.length ?? 0) > 0)
+    .map((site) => ({ label: site, rooms: bySite.get(site)! }));
   return { groups, totalCount: rooms.length };
 }
 
 export async function GET() {
   try {
     const rooms = await fetchRooms();
-    const grouped = groupByBuilding(rooms);
+    const grouped = groupBySite(rooms);
     return NextResponse.json(grouped);
   } catch (error) {
     console.error("Failed to fetch rooms:", error);

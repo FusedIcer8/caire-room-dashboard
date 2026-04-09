@@ -10,6 +10,7 @@ import { DailyView } from "@/components/daily-view";
 import { WeeklyView } from "@/components/weekly-view";
 import { EventDetailPanel } from "@/components/event-detail-panel";
 import { QuickBookPanel } from "@/components/quick-book-panel";
+import { getPresetRanges, type DateRange } from "@/components/date-range-picker";
 import { useRooms } from "@/hooks/use-rooms";
 import { useRoomCalendar } from "@/hooks/use-room-calendar";
 import { useAuth } from "@/hooks/use-auth";
@@ -30,6 +31,9 @@ export default function DashboardPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [minCapacity, setMinCapacity] = useState(1);
   const [panel, setPanel] = useState<PanelState>({ type: "none" });
+  const [dateRange, setDateRange] = useState<DateRange>(() =>
+    getPresetRanges()["Today"](),
+  );
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -49,17 +53,13 @@ export default function DashboardPage() {
     [allRooms],
   );
 
-  const today = new Date();
-  const startDate = new Date(today);
-  startDate.setHours(0, 0, 0, 0);
-  const endDate = new Date(today);
-  endDate.setHours(23, 59, 59, 999);
-
   const { events, refresh } = useRoomCalendar({
     roomEmails,
-    startDate: startDate.toISOString(),
-    endDate: endDate.toISOString(),
+    startDate: dateRange.start.toISOString(),
+    endDate: dateRange.end.toISOString(),
   });
+
+  const today = new Date();
 
   const actorInfo = {
     email: userEmail ?? "",
@@ -215,6 +215,8 @@ export default function DashboardPage() {
         />
       }
       panel={panelNode}
+      dateRange={dateRange}
+      onDateRangeChange={setDateRange}
     >
       {(viewMode) => {
         if (viewMode === "timeline") {
