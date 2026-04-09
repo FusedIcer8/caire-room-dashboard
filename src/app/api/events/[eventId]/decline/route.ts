@@ -35,9 +35,9 @@ export async function POST(
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
-    console.error("Failed to decline room:", error);
+    console.error("Failed to decline room:", JSON.stringify(error));
     const message =
-      error instanceof Error ? error.message : "Failed to decline room";
+      error instanceof Error ? error.message : String(error);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -126,7 +126,8 @@ export default function DashboardPage() {
         showToast("Meeting cancelled successfully", "success");
         await refresh();
       } else {
-        showToast("Failed to cancel meeting", "error");
+        const body = await response.json().catch(() => ({}));
+        showToast(body.error ?? "Failed to cancel meeting", "error");
       }
     },
     [actorInfo, refresh, showToast],
@@ -158,7 +159,8 @@ export default function DashboardPage() {
         showToast("Room freed successfully", "success");
         await refresh();
       } else {
-        showToast("Failed to free room", "error");
+        const body = await response.json().catch(() => ({}));
+        showToast(body.error ?? "Failed to free room", "error");
       }
     },
     [actorInfo, refresh, showToast],

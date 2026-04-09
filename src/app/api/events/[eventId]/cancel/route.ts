@@ -27,14 +27,14 @@ export async function DELETE(
     auditLogger.log("cancel_meeting", actor, target, "success", null);
 
     await client
-      .api(`/users/${roomEmail}/events/${eventId}/cancel`)
-      .post({ comment: `Meeting cancelled by ${actor.name} via Room Dashboard` });
+      .api(`/users/${roomEmail}/events/${eventId}`)
+      .delete();
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
-    console.error("Failed to cancel meeting:", error);
+    console.error("Failed to cancel meeting:", JSON.stringify(error));
     const message =
-      error instanceof Error ? error.message : "Failed to cancel meeting";
+      error instanceof Error ? error.message : String(error);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
