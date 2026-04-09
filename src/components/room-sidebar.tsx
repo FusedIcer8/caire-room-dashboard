@@ -1,6 +1,8 @@
 "use client";
 
 import type { GroupedRooms } from "@/types/room";
+import type { DateRange } from "@/components/date-range-picker";
+import { MiniCalendar } from "@/components/mini-calendar";
 
 interface RoomSidebarProps {
   readonly data: GroupedRooms | null;
@@ -10,6 +12,8 @@ interface RoomSidebarProps {
   readonly onSearchChange: (query: string) => void;
   readonly minCapacity: number;
   readonly onMinCapacityChange: (value: number) => void;
+  readonly dateRange: DateRange;
+  readonly onDateRangeChange: (range: DateRange) => void;
 }
 
 export function RoomSidebar({
@@ -20,6 +24,8 @@ export function RoomSidebar({
   onSearchChange,
   minCapacity,
   onMinCapacityChange,
+  dateRange,
+  onDateRangeChange,
 }: RoomSidebarProps) {
   if (!data) {
     return <div className="p-3 text-sm text-gray-500">Loading rooms...</div>;
@@ -118,6 +124,23 @@ export function RoomSidebar({
           </div>
         </>
       )}
+
+      {/* Mini calendar — always visible */}
+      <div className="border-t border-[#2a2a3a] pt-3">
+        <div className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-500">
+          Date
+        </div>
+        <MiniCalendar
+          selectedDate={dateRange.start}
+          onDateSelect={(date) => {
+            const start = new Date(date);
+            start.setHours(0, 0, 0, 0);
+            const end = new Date(date);
+            end.setHours(23, 59, 59, 999);
+            onDateRangeChange({ start, end, label: "Custom" });
+          }}
+        />
+      </div>
     </div>
   );
 }

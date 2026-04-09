@@ -233,13 +233,15 @@ export default function DashboardPage() {
           onSearchChange={setSearchQuery}
           minCapacity={minCapacity}
           onMinCapacityChange={setMinCapacity}
+          dateRange={dateRange}
+          onDateRangeChange={setDateRange}
         />
       }
       panel={panelNode}
       dateRange={dateRange}
       onDateRangeChange={setDateRange}
     >
-      {(viewMode) => {
+      {(viewMode, currentDateRange) => {
         if (viewMode === "timeline") {
           return (
             <TimelineView
@@ -255,6 +257,7 @@ export default function DashboardPage() {
             <DailyView
               rooms={visibleRooms}
               events={events}
+              date={currentDateRange.start}
               onEventClick={handleEventClick}
               onEmptySlotClick={handleEmptySlotClick}
             />
@@ -265,6 +268,7 @@ export default function DashboardPage() {
             <WeeklyView
               rooms={visibleRooms}
               events={events}
+              weekStart={currentDateRange.start}
               onEventClick={handleEventClick}
               onEmptySlotClick={handleEmptySlotClick}
             />
