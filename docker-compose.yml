@@ -5,6 +5,8 @@ services:
       - "3000"
     env_file:
       - .env.local
+    volumes:
+      - audit-logs:/app/logs
     restart: unless-stopped
 
   nginx:
@@ -17,3 +19,7 @@ services:
     depends_on:
       - dashboard
     restart: unless-stopped
+
+volumes:
+  audit-logs:
+    driver: local
